@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rubber Duck Debugger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-left"></div>
+    <div class="bg-shape bg-shape-right"></div>
+
+    <main class="container">
+      <header>
+        <p class="eyebrow">Live API Monitor</p>
+        <h1>Rubber Duck Debugger</h1>
+        <p class="subtitle">
+          Process-control dashboard for incoming API calls with reconstruction, AI result,
+          and voice-ready monitoring.
+        </p>
+      </header>
+
+      <section class="panel process-panel">
+        <h2>Process Flow</h2>
+        <div class="process-strip">
+          <div class="stage"><span>1</span><p>Receive Payload</p></div>
+          <div class="stage"><span>2</span><p>Reconstruct Image</p></div>
+          <div class="stage"><span>3</span><p>AI Analysis</p></div>
+          <div class="stage"><span>4</span><p>Voice Ready</p></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Live KPIs</h2>
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <p>Total Calls</p>
+            <strong id="metricTotal">0</strong>
+          </article>
+          <article class="kpi-card">
+            <p>Successful</p>
+            <strong id="metricSuccess">0</strong>
+          </article>
+          <article class="kpi-card">
+            <p>Errors</p>
+            <strong id="metricErrors">0</strong>
+          </article>
+          <article class="kpi-card">
+            <p>Avg Bytes</p>
+            <strong id="metricAvgBytes">0</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Received API Calls</h2>
+          <div class="controls">
+            <label for="statusFilter" class="subtitle">Status</label>
+            <select id="statusFilter">
+              <option value="all">All</option>
+              <option value="completed">AI Completed</option>
+              <option value="skipped">AI Skipped</option>
+              <option value="error">Errors</option>
+            </select>
+            <button id="refreshBtn" class="button control-btn">Refresh</button>
+            <button id="exportBtn" class="button control-btn">Export CSV</button>
+          </div>
+        </div>
+        <p id="receivedMeta" class="subtitle">Waiting for incoming calls...</p>
+        <div id="receivedList" class="received-list"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

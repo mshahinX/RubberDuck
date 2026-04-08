@@ -1,0 +1,15 @@
+{
+  "name": "rubber-duck-debugger",
+  "version": "0.1.0",
+  "description": "Reconstruct images from hexadecimal payloads, analyze with AI, and play spoken results.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2"
+  }
+}

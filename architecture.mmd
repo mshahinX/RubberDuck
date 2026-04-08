@@ -1,0 +1,75 @@
+flowchart TB
+    classDef espStyle fill:#1a73e8,stroke:#0d47a1,color:#fff,stroke-width:2px,rx:12
+    classDef serverStyle fill:#34a853,stroke:#1b5e20,color:#fff,stroke-width:2px,rx:12
+    classDef aiStyle fill:#9c27b0,stroke:#6a1b9a,color:#fff,stroke-width:2px,rx:12
+    classDef dashStyle fill:#ff6d00,stroke:#e65100,color:#fff,stroke-width:2px,rx:12
+
+    subgraph ESP["🔌 ESP32-CAM Module"]
+        direction TB
+        CAM["📷 OV2640 Camera\nJPEG VGA 640×480\nQuality: 10"]
+        WIFI["📶 WiFi Client\nSSID → LAN"]
+        SD["💾 SD Card Storage\nphoto.jpg + photo.csv"]
+        HEX["🔄 Hex Encoder\nBinary → Spaced Hex\n(2 chars + space per byte)"]
+        HTTP_OUT["📤 HTTP POST\nJSON: { hexData: '...' }\napplication/json"]
+    end
+
+    subgraph SERVER["⚙️ Node.js / Express Server  (port 3000)"]
+        direction TB
+        API_IN["🔗 POST /api/reconstruct-analyze\nJSON body limit: 25 MB"]
+        PARSE["🧩 Hex Parser\nTokenized bytes → Buffer\nFallback: continuous hex"]
+        JPEG_FIX["🔧 JPEG Recovery\nFFD8 / FFD9 marker extraction\nByte-size mismatch correction"]
+        MIME["🏷️ MIME Detector\nJPEG · PNG · GIF · BMP · WebP"]
+        B64["📦 Base64 Encoder\nBuffer → data:image URL"]
+        HISTORY["🗂️ In-Memory History\nMax 40 entries (ring buffer)\nCaller IP · Status · Payload"]
+        API_GET["🔗 GET /api/received-data\nPaginated history endpoint"]
+        STATIC["📁 Static File Server\nServes public/ directory"]
+    end
+
+    subgraph AI["🤖 OpenAI Vision API"]
+        direction TB
+        GPT["🧠 GPT-4.1 Mini\nVision Model"]
+        PROMPT["📝 Rubber Duck Prompt\n1. Summarize image\n2. Root causes\n3. Actionable fix"]
+        RESULT["📄 Analysis Response\nStructured text output"]
+    end
+
+    subgraph DASH["🖥️ Web Dashboard (Browser)"]
+        direction TB
+        KPI["📊 Live KPIs\nTotal · Success · Errors · Avg Bytes"]
+        FILTER["🔍 Status Filter\nAll · Completed · Skipped · Errors"]
+        CARDS["🃏 API Call Cards\nImage preview · Analysis text\nCaller info · Timestamps"]
+        SPEECH["🔊 Speech Synthesis\nWeb Speech API\nSpeak analysis aloud"]
+        CSV["📥 CSV Export\nDownload filtered results"]
+        POLL["🔄 Auto-Refresh\nPolls every 4 seconds"]
+    end
+
+    CAM -->|"JPEG frame buffer"| HEX
+    CAM -->|"Raw JPEG bytes"| SD
+    HEX -->|"Hex-encoded string"| HTTP_OUT
+    WIFI -.->|"LAN Connection"| HTTP_OUT
+    HTTP_OUT ==>|"POST JSON payload\nover WiFi LAN"| API_IN
+
+    API_IN --> PARSE
+    PARSE --> JPEG_FIX
+    JPEG_FIX --> MIME
+    MIME --> B64
+    B64 ==>|"data:image URL"| GPT
+    GPT --> PROMPT
+    PROMPT --> RESULT
+    RESULT ==>|"Analysis text"| HISTORY
+
+    B64 --> HISTORY
+    HISTORY --> API_GET
+
+    POLL ==>|"GET /api/received-data"| API_GET
+    API_GET ==>|"JSON: items[], total, limit"| KPI
+    API_GET --> FILTER
+    FILTER --> CARDS
+    CARDS --> SPEECH
+    CARDS --> CSV
+
+    STATIC -.->|"index.html\napp.js · styles.css"| DASH
+
+    class CAM,WIFI,SD,HEX,HTTP_OUT espStyle
+    class API_IN,PARSE,JPEG_FIX,MIME,B64,HISTORY,API_GET,STATIC serverStyle
+    class GPT,PROMPT,RESULT aiStyle
+    class KPI,FILTER,CARDS,SPEECH,CSV,POLL dashStyle
